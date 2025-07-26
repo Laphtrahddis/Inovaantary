@@ -1,0 +1,126 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { InventoryService } from '../../services/inventory';
+import { RouterLink } from '@angular/router';
+import { Item } from '../../models/item.model';
+import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-confirm-dialog'; // <-- Import dialog
+import { Subject } from 'rxjs'; // <-- NEW: Import Subject
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators'; // <-- NEW: Import operators
+
+@Component({
+  selector: 'app-item-dashboard',
+  standalone: true,
+  imports: [CommonModule, DeleteConfirmDialogComponent, RouterLink],
+  templateUrl: './item-dashboard.html',
+  styleUrl: './item-dashboard.css'
+})
+export class ItemDashboardComponent implements OnInit {
+  private inventoryService = inject(InventoryService);
+  private searchSubject = new Subject<string>();
+  private allItems: Item[] = [];
+  items: Item[] = [];
+  isDialogOpen = false;
+  itemToDelete: Item | null = null;
+  currentPage = 1;
+  itemsPerPage = 10;
+
+  ngOnInit(): void {
+    this.loadItems();
+    this.loadAllItemsForStats();
+    // NEW: Subscribe to the search subject to trigger API calls
+    this.searchSubject.pipe(
+      debounceTime(300), // Wait 300ms after the user stops typing
+      distinctUntilChanged() // Only trigger if the value has changed
+    ).subscribe(searchTerm => {
+      this.currentPage = 1; 
+      this.loadItems({ search: searchTerm });
+    });
+  }
+  // NEW: This method is called by the input field in the HTML
+  onSearch(event: Event): void {
+    const searchTerm = (event.target as HTMLInputElement).value;
+    this.searchSubject.next(searchTerm);
+  }
+
+  get totalItems(): number {
+    return this.allItems.length;
+  }
+
+  get totalValue(): number {
+    return this.allItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  }
+
+  get categoryCount(): number {
+    const uniqueCategories = new Set(this.allItems.map(item => item.category));
+    return uniqueCategories.size;
+  }
+  // NEW: Method to load all items for stat calculations
+  loadAllItemsForStats(): void {
+    this.inventoryService.getAllItems().subscribe(data => {
+      this.allItems = data;
+    });
+  }
+
+  // After
+loadItems(params: { category?: string; search?: string } = {}): void {
+  const pageParams = { 
+    page: this.currentPage, 
+    limit: this.itemsPerPage, 
+    ...params 
+  };
+
+  this.inventoryService.getItems(pageParams).subscribe(data => {
+    this.items = data;
+  });
+}
+  // This now opens the dialog
+  openDeleteDialog(item: Item): void {
+    this.itemToDelete = item;
+    this.isDialogOpen = true;
+  }
+
+  nextPage(): void {
+  this.currentPage++;
+  this.loadItems();
+}
+
+previousPage(): void {
+  if (this.currentPage > 1) {
+    this.currentPage--;
+    this.loadItems();
+  }
+}
+
+  closeDeleteDialog(): void {
+    this.isDialogOpen = false;
+    this.itemToDelete = null;
+  }
+
+  // This is called when the dialog's confirm event is emitted
+  onConfirmDelete(): void {
+    if (!this.itemToDelete) return;
+
+    this.inventoryService.deleteItem(this.itemToDelete._id).subscribe({
+      next: () => {
+        console.log('Item deleted successfully!');
+        this.loadItems(); // Refresh the list
+        this.closeDeleteDialog(); // Close the dialog
+        this.loadAllItemsForStats();
+      },
+      error: (err) => console.error('Error deleting item:', err)
+    });
+  }
+
+  // // We will implement this later
+  // deleteItem(id: string): void {
+  //   console.log('Deleting item with ID:', id);
+  //   this.inventoryService.deleteItem(id).subscribe({
+  //     next: () => {
+  //       console.log('Item deleted successfully!');
+  //       // Reload the items list to reflect the change on the UI
+  //       this.loadItems();
+  //     },
+  //     error: (err) => console.error('Error deleting item:', err)
+  //   });
+  //}
+}
