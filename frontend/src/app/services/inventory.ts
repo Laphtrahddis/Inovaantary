@@ -39,5 +39,11 @@ export class InventoryService {
   updateItem(id: string, itemData: Partial<Item>): Observable<Item> {
     return this.http.put<Item>(`${this.apiUrl}/${id}`, itemData);
   }
+  // Add this method inside the InventoryService class
+
+  // PATCH to adjust an item's quantity
+  adjustQuantity(id: string, change: number): Observable<Item> {
+    return this.http.patch<Item>(`${this.apiUrl}/${id}/adjust_quantity`, { change });
+  }
   
 }

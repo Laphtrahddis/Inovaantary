@@ -96,6 +96,33 @@ previousPage(): void {
     this.itemToDelete = null;
   }
 
+  // Add these two methods inside the ItemDashboardComponent class
+
+  incrementQuantity(item: Item): void {
+    this.inventoryService.adjustQuantity(item._id, 1).subscribe({
+      next: (updatedItem) => {
+        // Update the item in the local array for instant UI feedback
+        item.quantity = updatedItem.quantity;
+        this.loadAllItemsForStats()
+      },
+      error: (err) => console.error('Error incrementing quantity:', err)
+    });
+  }
+
+  decrementQuantity(item: Item): void {
+    // Prevent quantity from going below 1
+    if (item.quantity <= 1) return;
+
+    this.inventoryService.adjustQuantity(item._id, -1).subscribe({
+      next: (updatedItem) => {
+        // Update the item in the local array for instant UI feedback
+        item.quantity = updatedItem.quantity;
+        this.loadAllItemsForStats()
+      },
+      error: (err) => console.error('Error decrementing quantity:', err)
+    });
+  }
+
   // This is called when the dialog's confirm event is emitted
   onConfirmDelete(): void {
     if (!this.itemToDelete) return;
@@ -110,17 +137,4 @@ previousPage(): void {
       error: (err) => console.error('Error deleting item:', err)
     });
   }
-
-  // // We will implement this later
-  // deleteItem(id: string): void {
-  //   console.log('Deleting item with ID:', id);
-  //   this.inventoryService.deleteItem(id).subscribe({
-  //     next: () => {
-  //       console.log('Item deleted successfully!');
-  //       // Reload the items list to reflect the change on the UI
-  //       this.loadItems();
-  //     },
-  //     error: (err) => console.error('Error deleting item:', err)
-  //   });
-  //}
 }

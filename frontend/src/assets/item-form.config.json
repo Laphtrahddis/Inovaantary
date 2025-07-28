@@ -1,0 +1,53 @@
+[
+  {
+    "name": "productName",
+    "label": "Product Name",
+    "type": "text",
+    "validators": { "required": true, "maxLength": 100 }
+  },
+  {
+    "name": "category",
+    "label": "Category",
+    "type": "select",
+    "options": [
+      { "label": "Select a category...", "value": "" },
+      { "label": "Office Equipment", "value": "Office Equipment" },
+      { "label": "Stationery", "value": "Stationery" },
+      { "label": "Office Furniture", "value": "Office Furniture" },
+      { "label": "Office Accessories", "value": "Office Accessories" }
+    ],
+    "validators": { "required": true }
+  },
+  {
+    "name": "quantity",
+    "label": "Quantity in Stock",
+    "type": "number",
+    "validators": { "required": true, "min": 0 }
+  },
+  {
+    "name": "price",
+    "label": "Price (USD)",
+    "type": "number",
+    "validators": { "required": true, "min": 0.01 }
+  },
+  {
+    "name": "phoneNumber",
+    "label": "Vendor Contact",
+    "type": "tel",
+    "validators": { "pattern": "^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$" }
+  },
+  {
+    "name": "internalRating",
+    "label": "Internal Quality Rating (1-5)",
+    "type": "range",
+    "min": 1,
+    "max": 5,
+    "validators": {}
+  },
+  {
+    "name": "description",
+    "label": "Description",
+    "type": "textarea",
+    "validators": { "maxLength": 500 }
+  }
+]

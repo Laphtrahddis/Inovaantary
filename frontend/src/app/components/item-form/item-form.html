@@ -1,152 +1,90 @@
-<!-- <main class="flex flex-1 justify-center px-40 py-5">
-  <div class="layout-content-container flex w-[512px] max-w-[512px] max-w-[960px] flex-1 flex-col py-5">
-    <div class="flex flex-wrap justify-between gap-3 p-4">
-      <p class="min-w-72 text-[32px] font-bold leading-tight tracking-light text-[#101519]">Add New Item</p>
-    </div>
-    <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-      <label class="flex min-w-40 flex-1 flex-col">
-        <p class="pb-2 text-base font-medium leading-normal text-[#101519]">Product Name</p>
-        <input
-          placeholder="Enter product name"
-          class="form-input flex h-14 min-w-0 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#d3dde4] bg-gray-50 p-[15px] text-base font-normal leading-normal text-[#101519] placeholder:text-[#58788d] focus:border-[#d3dde4] focus:outline-0 focus:ring-0"
-          value=""
-        />
-      </label>
-    </div>
-    <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-      <label class="flex min-w-40 flex-1 flex-col">
-        <p class="pb-2 text-base font-medium leading-normal text-[#101519]">Email</p>
-        <input
-          placeholder="Enter email"
-          class="form-input flex h-14 min-w-0 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#d3dde4] bg-gray-50 p-[15px] text-base font-normal leading-normal text-[#101519] placeholder:text-[#58788d] focus:border-[#d3dde4] focus:outline-0 focus:ring-0"
-          value=""
-        />
-      </label>
-    </div>
-    <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-      <label class="flex min-w-40 flex-1 flex-col">
-        <p class="pb-2 text-base font-medium leading-normal text-[#101519]">Phone Number</p>
-        <input
-          placeholder="Enter phone number"
-          class="form-input flex h-14 min-w-0 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#d3dde4] bg-gray-50 p-[15px] text-base font-normal leading-normal text-[#101519] placeholder:text-[#58788d] focus:border-[#d3dde4] focus:outline-0 focus:ring-0"
-          value=""
-        />
-      </label>
-    </div>
-    <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-      <label class="flex min-w-40 flex-1 flex-col">
-        <p class="pb-2 text-base font-medium leading-normal text-[#101519]">Category</p>
-        <select
-          class="form-input flex h-14 min-w-0 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#d3dde4] bg-gray-50 bg-[image:--select-button-svg] p-[15px] text-base font-normal leading-normal text-[#101519] placeholder:text-[#58788d] focus:border-[#d3dde4] focus:outline-0 focus:ring-0"
-        >
-          <option value="one">Select category</option>
-          <option value="two">two</option>
-          <option value="three">three</option>
-        </select>
-      </label>
-    </div>
-    <div class="flex flex-col gap-3 p-4">
-      <label class="flex items-center gap-4 rounded-lg border border-solid border-[#d3dde4] p-[15px]">
-        <input
-          type="radio"
-          class="h-5 w-5 border-2 border-[#d3dde4] bg-transparent text-transparent checked:border-[#358ec9] checked:bg-[image:--radio-dot-svg] focus:outline-none focus:ring-0 focus:ring-offset-0 checked:focus:border-[#358ec9]"
-          name="5d320207-270d-48ba-8c11-44ce65c34fe9"
-          checked=""
-        />
-        <div class="flex grow flex-col"><p class="text-sm font-medium leading-normal text-[#101519]">Option 1</p></div>
-      </label>
-      <label class="flex items-center gap-4 rounded-lg border border-solid border-[#d3dde4] p-[15px]">
-        <input
-          type="radio"
-          class="h-5 w-5 border-2 border-[#d3dde4] bg-transparent text-transparent checked:border-[#358ec9] checked:bg-[image:--radio-dot-svg] focus:outline-none focus:ring-0 focus:ring-offset-0 checked:focus:border-[#358ec9]"
-          name="5d320207-270d-48ba-8c11-44ce65c34fe9"
-        />
-        <div class="flex grow flex-col"><p class="text-sm font-medium leading-normal text-[#101519]">Option 2</p></div>
-      </label>
-    </div>
-    <div class="px-4">
-      <label class="flex flex-row gap-x-3 py-3">
-        <input
-          type="checkbox"
-          class="h-5 w-5 rounded border-2 border-[#d3dde4] bg-transparent text-[#358ec9] checked:border-[#358ec9] checked:bg-[#358ec9] checked:bg-[image:--checkbox-tick-svg] focus:border-[#d3dde4] focus:outline-none focus:ring-0 focus:ring-offset-0"
-        />
-        <p class="text-base font-normal leading-normal text-[#101519]">Agree to terms and conditions</p>
-      </label>
-    </div>
-    <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-      <label class="flex min-w-40 flex-1 flex-col">
-        <p class="pb-2 text-base font-medium leading-normal text-[#101519]">Description</p>
-        <textarea
-          placeholder="Enter description"
-          class="form-input flex min-h-36 min-w-0 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#d3dde4] bg-gray-50 p-[15px] text-base font-normal leading-normal text-[#101519] placeholder:text-[#58788d] focus:border-[#d3dde4] focus:outline-0 focus:ring-0"
-        ></textarea>
-      </label>
-    </div>
-    <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-      <label class="flex min-w-40 flex-1 flex-col">
-        <p class="pb-2 text-base font-medium leading-normal text-[#101519]">Date</p>
-        <input
-          placeholder="Select date"
-          class="form-input flex h-14 min-w-0 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#d3dde4] bg-gray-50 p-[15px] text-base font-normal leading-normal text-[#101519] placeholder:text-[#58788d] focus:border-[#d3dde4] focus:outline-0 focus:ring-0"
-          value=""
-        />
-      </label>
-    </div>
-    <div class="flex justify-stretch">
-      <div class="flex flex-1 flex-wrap justify-end gap-3 px-4 py-3">
-        <button
-          class="flex h-10 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#e9eef1] px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#101519]"
-        >
-          <span class="truncate">Cancel</span>
-        </button>
-        <button
-          class="flex h-10 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#358ec9] px-4 text-sm font-bold leading-normal tracking-[0.015em] text-gray-50"
-        >
-          <span class="truncate">Save</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</main> -->
-
-
-
-<div class="container mx-auto p-4 max-w-lg">
-  <h1 class="text-2xl font-bold mb-4">Add New Item</h1>
+<!-- <div class="container mx-auto p-4 max-w-lg">
+  <h1 class="text-2xl font-bold mb-4">
+    {{ isEditMode ? 'Edit Item' : 'Add New Item' }}
+  </h1>
 
   <form [formGroup]="itemForm" (ngSubmit)="onSave()" class="space-y-4">
     
-    <div>
-      <label for="productName" class="block font-medium">Product Name</label>
-      <input id="productName" type="text" formControlName="productName" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label for="category" class="block font-medium">Category</label>
-      <input id="category" type="text" formControlName="category" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label for="quantity" class="block font-medium">Quantity</label>
-      <input id="quantity" type="number" formControlName="quantity" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label for="price" class="block font-medium">Price</label>
-      <input id="price" type="number" formControlName="price" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label for="description" class="block font-medium">Description (Optional)</label>
-      <textarea id="description" formControlName="description" class="w-full p-2 border rounded"></textarea>
-    </div>
-
-    <div>
-      <label for="phoneNumber" class="block font-medium">Vendor Phone (Optional)</label>
-      <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="w-full p-2 border rounded">
-    </div>
+    @for (field of formConfig; track field.name) {
+      <div class="field-container">
+        <label [for]="field.name" class="block font-medium">{{ field.label }}</label>
+        
+        @switch (field.type) {
+          @case ('text') {
+            <input [id]="field.name" type="text" [formControlName]="field.name" class="w-full p-2 border rounded">
+          }
+          @case ('number') {
+            <input [id]="field.name" type="number" [formControlName]="field.name" class="w-full p-2 border rounded">
+          }
+          @case ('date') {
+            <input [id]="field.name" type="date" [formControlName]="field.name" class="w-full p-2 border rounded">
+          }
+          @case ('textarea') {
+            <textarea [id]="field.name" [formControlName]="field.name" class="w-full p-2 border rounded"></textarea>
+          }
+          @case ('checkbox') {
+            <div class="mt-2">
+              <input [id]="field.name" type="checkbox" [formControlName]="field.name" class="h-4 w-4 rounded border-gray-300">
+            </div>
+          }
+          @case ('radio') {
+            <div class="mt-2 space-y-2">
+              @for (option of field.options; track option.value) {
+                <label class="flex items-center">
+                  <input type="radio" [name]="field.name" [value]="option.value" [formControlName]="field.name" class="h-4 w-4">
+                  <span class="ml-2">{{ option.label }}</span>
+                </label>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
     
     <button type="submit" [disabled]="itemForm.invalid" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400">
+      Save Item
+    </button>
+
+  </form>
+</div> -->
+
+
+<div class="container mx-auto p-4 max-w-lg">
+  <h1 class="text-2xl font-bold mb-4">
+    {{ isEditMode ? 'Edit Item' : 'Add New Item' }}
+  </h1>
+
+  <form [formGroup]="itemForm" (ngSubmit)="onSave()" class="space-y-6">
+    
+    @for (field of formConfig; track field.name) {
+      <div class="field-container">
+        <label [for]="field.name" class="block font-medium mb-1">{{ field.label }}</label>
+        
+        @switch (field.type) {
+          @case ('text') { <input [id]="field.name" type="text" [formControlName]="field.name" class="w-full p-2 border rounded"> }
+          @case ('number') { <input [id]="field.name" type="number" [formControlName]="field.name" class="w-full p-2 border rounded"> }
+          @case ('tel') { <input [id]="field.name" type="tel" [formControlName]="field.name" class="w-full p-2 border rounded"> }
+          @case ('textarea') { <textarea [id]="field.name" [formControlName]="field.name" class="w-full p-2 border rounded"></textarea> }
+          
+          @case ('select') {
+            <select [id]="field.name" [formControlName]="field.name" class="w-full p-2 border rounded bg-white">
+              @for (option of field.options; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          }
+
+          @case ('range') {
+            <div class="flex items-center space-x-4">
+              <input [id]="field.name" type="range" [min]="field.min" [max]="field.max" [formControlName]="field.name" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+              <span class="font-semibold w-8 text-center">{{ itemForm.get(field.name)?.value }}</span>
+            </div>
+          }
+        }
+      </div>
+    }
+    
+    <button type="submit" [disabled]="itemForm.invalid" class="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 disabled:bg-gray-400 font-bold">
       Save Item
     </button>
 

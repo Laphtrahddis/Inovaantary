@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import List, Any, Dict, Optional
 from datetime import datetime, timezone
 from bson import ObjectId
-from app.models.item import ItemUpdate # <-- Import the new model
+from app.models.item import ItemCreate, ItemOut, ItemUpdate, QuantityAdjustment # <-- Import the new model
 
 from app.db.mongodb import get_database
 from app.models.item import ItemCreate, ItemOut
@@ -150,3 +150,31 @@ async def delete_item(
         raise HTTPException(status_code=404, detail=f"Item with ID {item_id} not found")
     
     return # On success, return nothing with a 204 status code
+
+@router.patch(
+    "/items/{item_id}/adjust_quantity",
+    response_model=ItemOut,
+    summary="Increment or decrement an item's quantity"
+)
+async def adjust_item_quantity(
+    item_id: str,
+    adjustment: QuantityAdjustment = Body(...),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    Adjusts an item's quantity by the amount specified in 'change'.
+    Uses MongoDB's $inc operator for an atomic update.
+    """
+    if not ObjectId.is_valid(item_id):
+        raise HTTPException(status_code=400, detail="Invalid item ID format")
+
+    updated_item = await db[COLLECTION_NAME].find_one_and_update(
+        {"_id": ObjectId(item_id)},
+        {"$inc": {"quantity": adjustment.change}},
+        return_document=True
+    )
+
+    if updated_item is None:
+        raise HTTPException(status_code=404, detail=f"Item with ID {item_id} not found")
+
+    return updated_item

@@ -40,7 +40,12 @@ class ItemBase(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
+        extra = 'allow'
     )
+
+class QuantityAdjustment(BaseModel):
+    """Model for adjusting item quantity."""
+    change: int
 
 
 class ItemCreate(ItemBase):

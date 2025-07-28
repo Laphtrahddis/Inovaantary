@@ -1,0 +1,7 @@
+.hoverable-text {
+  cursor: default;
+}
+
+.hoverable-text:hover {
+  cursor: pointer; /* Or any other cursor type */
+}

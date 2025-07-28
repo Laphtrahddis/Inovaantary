@@ -29,12 +29,7 @@
         </div>
       </label>
     </div>
-    <div class="flex justify-start px-4 py-3">
-      <button class="flex h-10 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#e7eef4] px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#0d161c]">
-        <span class="truncate">Add New Category</span>
-      </button>
-    </div>
-
+   
     <div class="px-4 py-3 @container">
       <div class="flex overflow-hidden rounded-xl border border-[#cedee8] bg-slate-50">
         <table class="w-full flex-1">
@@ -44,10 +39,10 @@
               <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Item Name</th>
               <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Category</th>
               <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Date Added</th>
+              <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Price</th>
               <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Count</th>
-              <th class="w-60 px-4 py-3 text-left text-sm font-medium leading-normal text-[#497b9c]"></th>
-              <th class="w-60 px-4 py-3 text-left text-sm font-medium leading-normal text-[#497b9c]">Edit</th>
-              <th class="w-60 px-4 py-3 text-left text-sm font-medium leading-normal text-[#497b9c]">Delete</th>
+              <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Edit</th>
+              <th class="w-[400px] px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -57,12 +52,21 @@
               <td class="h-[72px] w-[400px] px-4 py-2 align-middle text-sm font-normal leading-normal text-[#0d161c]">{{ it.productName }}</td>
               <td class="h-[72px] w-[400px] px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">{{ it.category }}</td>
               <td class="h-[72px] w-[400px] px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">{{ it.dateAdded | date:'yyyy-MM-dd' }}</td>
-              <td class="h-[72px] w-[400px] px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">{{ it.quantity }}</td>
-              <td class="h-[72px] w-60 px-4 py-2 align-middle text-sm font-bold leading-normal tracking-[0.015em] text-[#497b9c]">+ -</td>
+              <td class="h-[72px] w-[400px] px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">${{ it.price }}</td>
+              <td class="h-[72px] w-60 px-4 py-2 align-middle">
+  <div class="flex items-center space-x-2">
+    <button (click)="decrementQuantity(it)" [disabled]="it.quantity <= 1" class="px-2 py-0.5 border rounded disabled:opacity-50">-</button>
+    <span>{{ it.quantity }}</span>
+    <button (click)="incrementQuantity(it)" class="px-2 py-0.5 border rounded">+</button>
+  </div>
+</td>
               <td class="h-[72px] w-60 px-4 py-2 align-middle text-sm font-bold leading-normal tracking-[0.015em]"> 
                   <a [routerLink]="['/edit-item', it._id]" class="text-blue-600 hover:underline cursor-pointer">Edit</a>
               </td>
-              <td (click)="openDeleteDialog(it)" class="h-[72px] w-60 px-4 py-2 align-middle text-sm font-bold leading-normal tracking-[0.015em] text-[#497b9c]">Delete</td>
+              <td (click)="openDeleteDialog(it)" class="h-[72px] w-60 px-4 py-2 align-middle text-sm font-bold leading-normal tracking-[0.015em]"> 
+                  <a class="text-blue-600 hover:underline cursor-pointer">Delete</a>
+              </td>
+              
             </tr>
             } @empty {
             <tr class="border-t border-t-[#cedee8]">

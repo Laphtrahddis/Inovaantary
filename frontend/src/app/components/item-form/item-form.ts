@@ -1,116 +1,84 @@
-import { Component, OnInit, inject } from '@angular/core'; // <-- Import OnInit
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router'; // <-- Import ActivatedRoute
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common'; // <-- Import CommonModule
+import { FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { InventoryService } from '../../services/inventory';
+import formConfig from '../../../assets/item-form.config.json'; // <-- Import the JSON config
 
 @Component({
   selector: 'app-item-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule], // <-- Add CommonModule for @for
   templateUrl: './item-form.html',
   styleUrl: './item-form.css'
 })
-export class ItemFormComponent implements OnInit { // <-- Implement OnInit
+export class ItemFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private inventoryService = inject(InventoryService);
   private router = inject(Router);
-  private route = inject(ActivatedRoute); // <-- Inject ActivatedRoute to read the URL
+  private route = inject(ActivatedRoute);
 
-  itemForm: FormGroup = this.fb.group({
-    productName: ['', Validators.required],
-    category: ['', Validators.required],
-    quantity: [null, [Validators.required, Validators.min(1)]],
-    price: [null, [Validators.required, Validators.min(0.01)]],
-    description: [''],
-    phoneNumber: ['']
-  });
+  // NEW: Properties for the dynamic form
+  formConfig = formConfig;
+  itemForm: FormGroup;
 
-  // NEW: Properties to track the component's mode
   isEditMode = false;
   private currentItemId: string | null = null;
 
-  // NEW: ngOnInit lifecycle hook runs when the component loads
+  constructor() {
+    // Dynamically build the form from the JSON config
+    this.itemForm = this.fb.group({});
+    this.formConfig.forEach(field => {
+      const validators = this.getValidators(field.validators);
+      this.itemForm.addControl(field.name, this.fb.control(null, validators));
+    });
+  }
+
   ngOnInit(): void {
-    // Check the URL for an 'id' parameter
     this.currentItemId = this.route.snapshot.paramMap.get('id');
-    
     if (this.currentItemId) {
       this.isEditMode = true;
-      // If an ID exists, fetch that item's data and fill the form
       this.inventoryService.getItemById(this.currentItemId).subscribe(item => {
         this.itemForm.patchValue(item);
       });
     }
   }
 
-  // MODIFIED: onSave now handles both creating and updating
+  // NEW: Helper function to map JSON validators to Angular Validators
+  private getValidators(validatorsConfig: any): ValidatorFn[] {
+    const validators: ValidatorFn[] = [];
+    if (validatorsConfig.required) {
+      validators.push(Validators.required);
+    }
+    if (validatorsConfig.min) {
+      validators.push(Validators.min(validatorsConfig.min));
+    }
+    // NEW: Add maxLength validator
+    if (validatorsConfig.maxLength) {
+      validators.push(Validators.maxLength(validatorsConfig.maxLength));
+    }
+    // NEW: Add pattern validator
+    if (validatorsConfig.pattern) {
+      validators.push(Validators.pattern(validatorsConfig.pattern));
+    }
+    return validators;
+  }
+
   onSave(): void {
     if (!this.itemForm.valid) {
       console.error('Form is invalid');
       return;
     }
+    const action = this.isEditMode
+      ? this.inventoryService.updateItem(this.currentItemId!, this.itemForm.value)
+      : this.inventoryService.createItem(this.itemForm.value);
 
-    if (this.isEditMode && this.currentItemId) {
-      // If in edit mode, call the update service method
-      this.inventoryService.updateItem(this.currentItemId, this.itemForm.value).subscribe({
-        next: () => {
-          console.log('Item updated successfully!');
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err) => console.error('Error updating item:', err)
-      });
-    } else {
-      // If in create mode, use the original create logic
-      this.inventoryService.createItem(this.itemForm.value).subscribe({
-        next: () => {
-          console.log('Item created successfully!');
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err) => console.error('Error creating item:', err)
-      });
-    }
+    action.subscribe({
+      next: () => {
+        console.log(`Item ${this.isEditMode ? 'updated' : 'created'} successfully!`);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => console.error(`Error ${this.isEditMode ? 'updating' : 'creating'} item:`, err)
+    });
   }
 }
-// import { Component, inject } from '@angular/core';
-// import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-// import { Router } from '@angular/router';
-// import { InventoryService } from '../../services/inventory';
-
-// @Component({
-//   selector: 'app-item-form',
-//   standalone: true,
-//   imports: [ReactiveFormsModule],
-//   templateUrl: './item-form.html',
-//   styleUrl: './item-form.css'
-// })
-// export class ItemFormComponent {
-//   private fb = inject(FormBuilder);
-//   private inventoryService = inject(InventoryService);
-//   private router = inject(Router);
-
-//   // Define the form structure and validation rules
-//   itemForm: FormGroup = this.fb.group({
-//     productName: ['', Validators.required],
-//     category: ['', Validators.required],
-//     quantity: [null, [Validators.required, Validators.min(1)]],
-//     price: [null, [Validators.required, Validators.min(0.01)]],
-//     description: [''],
-//     phoneNumber: ['']
-//   });
-
-//   onSave(): void {
-//     // Check if the form is valid before submitting
-//     if (this.itemForm.valid) {
-//       console.log('Form data:', this.itemForm.value);
-//       this.inventoryService.createItem(this.itemForm.value).subscribe({
-//         next: () => {
-//           console.log('Item created successfully!');
-//           this.router.navigate(['/dashboard']); // Navigate back to dashboard on success
-//         },
-//         error: (err) => console.error('Error creating item:', err)
-//       });
-//     } else {
-//       console.error('Form is invalid');
-//     }
-//   }
-// }
