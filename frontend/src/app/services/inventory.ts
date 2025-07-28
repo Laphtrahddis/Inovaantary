@@ -10,38 +10,48 @@ export class InventoryService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8000/api/v1/items'; // Our backend URL
 
-  // GET all items (with optional search/filter)
-  getItems(params?: { category?: string; search?: string }): Observable<Item[]> {
-    return this.http.get<Item[]>(this.apiUrl, { params });
+getItems(params?: {
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    min_price?: number;
+    max_price?: number;
+    sort_by?: string;
+    sort_order?: number;
+  }): Observable<Item[]> {
+    return this.http.get<Item[]>(this.apiUrl+'/getitems', { params });
   }
 
-  // POST a new item
+  // POST a new item___________________________________________________________________________________________________________-
   createItem(itemData: Omit<Item, 'id' | 'dateAdded'>): Observable<Item> {
-    return this.http.post<Item>(this.apiUrl, itemData);
+    return this.http.post<Item>(this.apiUrl+'/create', itemData);
   }
 
+
+  //____________________________________________________________________________________________________________________________
   getAllItems(): Observable<Item[]> {
     // We set a very high limit to effectively get all items.
     // Adjust if you ever expect more than 10,000 items.
-    return this.http.get<Item[]>(this.apiUrl, { params: { limit: 100 } });
+    return this.http.get<Item[]>(this.apiUrl+'/getitems', { params: { limit: 100 } });
   }
 
-  // DELETE an item by its ID
+  // DELETE an item by its ID____________________________________________________________________________________________________________
   deleteItem(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
-  // GET a single item by its ID
+// GET a single item by its ID________________________________________- _____________-  ___________________________________________
   getItemById(id: string): Observable<Item> {
-    return this.http.get<Item>(`${this.apiUrl}/${id}`);
+    return this.http.get<Item>(`${this.apiUrl}/item/${id}`);
   }
 
-  // PUT (update) an item by its ID
+  // PUT (update) an item by its ID___________________________________________________________________________________________________
   updateItem(id: string, itemData: Partial<Item>): Observable<Item> {
-    return this.http.put<Item>(`${this.apiUrl}/${id}`, itemData);
+    return this.http.put<Item>(`${this.apiUrl}/update/${id}`, itemData);
   }
   // Add this method inside the InventoryService class
 
-  // PATCH to adjust an item's quantity
+  // PATCH to adjust an item's quantity_________________________________________________________________________________________
   adjustQuantity(id: string, change: number): Observable<Item> {
     return this.http.patch<Item>(`${this.apiUrl}/${id}/adjust_quantity`, { change });
   }

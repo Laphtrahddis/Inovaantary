@@ -6,11 +6,12 @@ import { Item } from '../../models/item.model';
 import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-confirm-dialog'; // <-- Import dialog
 import { Subject } from 'rxjs'; // <-- NEW: Import Subject
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'; // <-- NEW: Import operators
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-item-dashboard',
   standalone: true,
-  imports: [CommonModule, DeleteConfirmDialogComponent, RouterLink],
+  imports: [CommonModule, DeleteConfirmDialogComponent, RouterLink, ReactiveFormsModule],
   templateUrl: './item-dashboard.html',
   styleUrl: './item-dashboard.css'
 })
@@ -18,11 +19,24 @@ export class ItemDashboardComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private searchSubject = new Subject<string>();
   private allItems: Item[] = [];
+  private fb = inject(FormBuilder);
   items: Item[] = [];
   isDialogOpen = false;
   itemToDelete: Item | null = null;
   currentPage = 1;
   itemsPerPage = 10;
+  isFilterOpen = false;
+  filterForm: FormGroup;
+
+   constructor() {
+    // NEW: Initialize the filter form
+    this.filterForm = this.fb.group({
+      min_price: [null],
+      max_price: [null],
+      sort_by: ['price'],
+      sort_order: [1] // 1 for asc, -1 for desc
+    });
+  }
 
   ngOnInit(): void {
     this.loadItems();
@@ -62,17 +76,41 @@ export class ItemDashboardComponent implements OnInit {
   }
 
   // After
-loadItems(params: { category?: string; search?: string } = {}): void {
+loadItems(params: { search?: string } = {}): void {
+  const rawFilters = this.filterForm.value;
+
+  // NEW: Clean up the filter params to remove empty values
+  const cleanFilters: any = {};
+  Object.keys(rawFilters).forEach(key => {
+    const value = rawFilters[key];
+    if (value !== null && value !== undefined && value !== '') {
+      cleanFilters[key] = value;
+    }
+  });
+
   const pageParams = { 
     page: this.currentPage, 
     limit: this.itemsPerPage, 
-    ...params 
+    ...params, 
+    ...cleanFilters // <-- Use the clean filters object
   };
 
   this.inventoryService.getItems(pageParams).subscribe(data => {
     this.items = data;
   });
 }
+  
+  // NEW: Method to show/hide the filter panel
+  toggleFilter(): void {
+    this.isFilterOpen = !this.isFilterOpen;
+  }
+
+  // NEW: Method to apply the filters and reload the data
+  applyFilters(): void {
+    this.currentPage = 1; // Reset to first page
+    this.loadItems();
+    this.isFilterOpen = false; // Close the panel
+  }
   // This now opens the dialog
   openDeleteDialog(item: Item): void {
     this.itemToDelete = item;

@@ -17,7 +17,7 @@ router = APIRouter()
 COLLECTION_NAME = "items"
 
 @router.post(
-    "/items",
+    "/items/create",
     response_model=ItemOut,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new inventory item"
@@ -41,38 +41,49 @@ async def create_item(
     return new_item
 
 @router.get(
-    "/items", response_model=List[ItemOut], summary="Retrieve a list of inventory items"
+    "/items/getitems", response_model=List[ItemOut], summary="Retrieve a list of inventory items"
 )
 async def list_items(
     db: AsyncIOMotorDatabase = Depends(get_database),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    search: Optional[str] = Query(None, description="Search by product name"),
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
-    category: Optional[str] = Query(None, description="Filter by category"),
-    search: Optional[str] = Query(None, description="Search by product name (case-insensitive)"),
+    # NEW: Parameters for price range and sorting
+    min_price: Optional[float] = Query(None, description="Minimum price"),
+    max_price: Optional[float] = Query(None, description="Maximum price"),
+    sort_by: Optional[str] = Query(None, description="Field to sort by (e.g., 'price')"),
+    sort_order: int = Query(1, description="Sort order: 1 for asc, -1 for desc")
 ):
-    """
-    Retrieves a paginated list of inventory items, with optional
-    filtering by category and searching by product name.
-    """
     skip = (page - 1) * limit
     query_filter = {}
-
-    # Add category filter if provided
+    
+    # --- Search and Category Filter (Existing Logic) ---
     if category:
         query_filter["category"] = category
-
-    # Add search filter if provided (case-insensitive regex search)
     if search:
         query_filter["productName"] = {"$regex": search, "$options": "i"}
 
-    cursor = db[COLLECTION_NAME].find(query_filter).skip(skip).limit(limit)
-    items = await cursor.to_list(length=limit)
+    # --- NEW: Price Range Filter Logic ---
+    price_filter = {}
+    if min_price is not None:
+        price_filter["$gte"] = min_price
+    if max_price is not None:
+        price_filter["$lte"] = max_price
+    if price_filter:
+        query_filter["price"] = price_filter
+
+    # --- Database Query ---
+    cursor = db[COLLECTION_NAME].find(query_filter)
+
+    # --- NEW: Sorting Logic ---
+    if sort_by:
+        cursor = cursor.sort(sort_by, sort_order)
+
+    items = await cursor.skip(skip).limit(limit).to_list(length=limit)
     return items
-
-
-
 @router.get(
-    "/items/{item_id}",
+    "/items/item/{item_id}",
     response_model=ItemOut,
     summary="Get a single item by ID"
 )
@@ -95,7 +106,7 @@ async def get_item(
 
 
 @router.put(
-    "/items/{item_id}",
+    "/items/update/{item_id}",
     response_model=ItemOut,
     summary="Update an item by ID"
 )
@@ -130,7 +141,7 @@ async def update_item(
 
 
 @router.delete(
-    "/items/{item_id}",
+    "/items/delete/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete an item by ID"
 )
