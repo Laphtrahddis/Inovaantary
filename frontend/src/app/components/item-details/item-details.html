@@ -1,0 +1,28 @@
+<div class="container mx-auto p-8">
+  @if (item) {
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h1 class="text-3xl font-bold mb-4">{{ item.productName }}</h1>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-4 mb-4">
+        <div><span class="font-semibold">Category:</span> {{ item.category }}</div>
+        <div><span class="font-semibold">Quantity:</span> {{ item.quantity }}</div>
+        <div><span class="font-semibold">Price:</span> {{ item.price | currency:'USD' }}</div>
+        <div><span class="font-semibold">Vendor Contact:</span> {{ item.phoneNumber || 'N/A' }}</div>
+        <div><span class="font-semibold">Date Added:</span> {{ item.dateAdded | date:'medium' }}</div>
+        <div class="md:col-span-2"><span class="font-semibold">Description:</span> {{ item.description || 'N/A' }}</div>
+      </div>
+
+      <h2 class="text-2xl font-bold mb-3">Additional Details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (attr of item | keyvalue; track attr.key) {
+          @if (isDynamicAttribute(attr.key)) {
+            <div><span class="font-semibold capitalize">{{ formatKey(attr.key) }}:</span> {{ attr.value }}</div>
+          }
+        }
+      </div>
+
+    </div>
+  } @else {
+    <p>Loading item details...</p>
+  }
+</div>
