@@ -1,5 +1,11 @@
 @if (loadingService.isLoading$ | async) {
-  <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center">
-    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
+    
+    <div class="flex space-x-2">
+      <div class="dot"></div>
+      <div class="dot" style="animation-delay: 0.2s;"></div>
+      <div class="dot" style="animation-delay: 0.4s;"></div>
+    </div>
+
   </div>
 }

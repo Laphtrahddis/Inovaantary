@@ -56,4 +56,17 @@ getItems(params?: {
     return this.http.patch<Item>(`${this.apiUrl}/${id}/adjust_quantity`, { change });
   }
   
+  // Add this method inside the InventoryService class
+
+  // POST a list of new items for bulk creation
+  bulkCreateItems(items: Item[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/bulk`, items);
+  }
+
+  uploadPdf(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    // Note the new endpoint URL here
+    return this.http.post<any>(`${this.apiUrl}/upload-pdf`, formData);
+  }
 }

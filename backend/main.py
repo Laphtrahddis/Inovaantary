@@ -3,16 +3,25 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware # <-- Import this
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import routes as v1_routes
-from app.db.mongodb import close_mongo_connection, connect_to_mongo
+# MODIFIED: Import the 'db' object as well to access the database connection
+from app.db.mongodb import close_mongo_connection, connect_to_mongo, db
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Handle startup and shutdown events."""
     await connect_to_mongo()
+    
+    # NEW: Create the unique index on startup
+    print("Ensuring 'UNIQID' index exists...")
+    # This command is idempotent: it will only create the index if it doesn't exist.
+    # After
+    await db.db["items"].create_index("UNIQID", unique=True, sparse=True)
+    print("Index check complete.")
+    
     yield
     await close_mongo_connection()
 
@@ -25,7 +34,8 @@ app = FastAPI(
 
 # Define allowed origins for CORS
 origins = [
-    "http://localhost:4200", # Your Angular app
+    "http://localhost:4200",
+    "https://inovaantary-frotend.onrender.com/" # Your Angular app
 ]
 
 # Add CORS middleware

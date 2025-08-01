@@ -1,202 +1,180 @@
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=border_color" />
-  <main class="flex flex-1 justify-center px-8 py-5">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <div class="layout-content-container flex w-full flex-1 flex-col">
+<main class="flex-1 bg-slate-50">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
 
-    <div class="flex flex-wrap justify-between gap-3 p-4">
-      <p class="min-w-72 text-[32px] font-bold leading-tight tracking-light text-[#0d161c]">Inventory Records</p>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Inventory Records</h1>
     </div>
-    <div class="flex flex-wrap gap-4 p-4">
-      <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-[#cedee8] p-6">
-  <p class="text-base font-medium leading-normal text-[#0d161c]">Total Items</p>
-  <p class="text-2xl font-bold leading-tight tracking-light text-[#0d161c]">{{ totalItems }}</p>
-</div>
-<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-[#cedee8] p-6">
-  <p class="text-base font-medium leading-normal text-[#0d161c]">Total Value</p>
-  <p class="text-2xl font-bold leading-tight tracking-light text-[#0d161c]">{{ totalValue | currency:'USD' }}</p>
-</div>
-<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-[#cedee8] p-6">
-  <p class="text-base font-medium leading-normal text-[#0d161c]">Categories</p>
-  <p class="text-2xl font-bold leading-tight tracking-light text-[#0d161c]">{{ categoryCount }}</p>
-</div>
-    </div>
-    <div class="px-4 py-3">
-  <!-- Container for the search bar and filter button -->
-  <div class="flex items-center space-x-4">
-    
-    <!-- Search Bar (takes up most of the space) -->
-    <label class="flex h-12 w-full min-w-40 flex-col flex-1">
-      <div class="flex h-full w-full flex-1 items-stretch rounded-xl">
-        <div class="flex items-center justify-center rounded-l-xl border-r-0 border-none bg-[#e7eef4] pl-4 text-[#497b9c]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
-          </svg>
-        </div>
-        <input (input)="onSearch($event)" placeholder="Search items by name or category" class="form-input h-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl rounded-l-none border-l-0 border-none bg-[#e7eef4] px-4 pl-2 text-base font-normal leading-normal text-[#0d161c] placeholder:text-[#497b9c] focus:border-none focus:outline-0 focus:ring-0" />
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+        <p class="text-sm font-medium text-gray-500">Total Items</p>
+        <p class="text-3xl font-bold text-gray-800">{{ totalItems }}</p>
       </div>
-    </label>
+      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+        <p class="text-sm font-medium text-gray-500">Total Value</p>
+        <p class="text-3xl font-bold text-gray-800">{{ totalValue | currency:'USD' }}</p>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+        <p class="text-sm font-medium text-gray-500">Categories</p>
+        <p class="text-3xl font-bold text-gray-800">{{ categoryCount }}</p>
+      </div>
+      <a [routerLink]="['/low-stock']"
+        class="relative group bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 block cursor-pointer">
+        <p class="text-sm font-medium text-gray-500">Low Stock Items (Click to know more)</p>
+        <p class="text-3xl font-bold text-orange-500">{{ lowStockItems }}</p>
 
-    <!-- Filter Button -->
-    <button (click)="toggleFilter()" class="flex-shrink-0 h-12 px-5 rounded-xl bg-[#e7eef4] hover:bg-[#dbe3eb] text-sm font-bold text-[#0d161c]">
-      Filter & Sort
-    </button>
+        <span
+          class="material-icons absolute top-4 right-4 text-gray-300 group-hover:text-orange-500 transition-colors duration-300">
+          arrow_forward
+        </span>
+      </a>
+      <div
+        class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 col-span-1 sm:col-span-2 lg:col-span-1">
+        <p class="text-sm font-medium text-gray-500">Most Valuable Item</p>
+        <p class="text-3xl font-bold text-gray-800 truncate">${{ mostValuableItem }}</p>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+        <p class="text-sm font-medium text-gray-500">Average Item Price</p>
+        <p class="text-3xl font-bold text-gray-800">{{ averagePrice | currency:'USD' }}</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl shadow-md mb-6">
+      <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-2">
+  <div class="flex items-center border rounded-lg px-3 py-2 w-full bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-shadow">
+    <span class="material-icons text-gray-500">search</span>
+    <input (input)="onSearch($event)" placeholder="Search items..." class="w-full bg-transparent ml-2 focus:outline-none text-gray-800">
   </div>
 
-  <!-- Floating Filter Panel (appears when isFilterOpen is true) -->
-  @if (isFilterOpen) {
-    <div class="mt-3 border rounded-xl bg-slate-50 p-4">
-      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <!-- Min Price -->
-        <div>
-          <label for="min_price" class="text-sm font-medium">Min Price</label>
-          <input id="min_price" type="number" formControlName="min_price" class="w-full p-2 border rounded mt-1 bg-white">
-        </div>
-        <!-- Max Price -->
-        <div>
-          <label for="max_price" class="text-sm font-medium">Max Price</label>
-          <input id="max_price" type="number" formControlName="max_price" class="w-full p-2 border rounded mt-1 bg-white">
-        </div>
-        <!-- Sort By -->
-        <div>
-          <label for="sort_by" class="text-sm font-medium">Sort By</label>
-          <select id="sort_by" formControlName="sort_by" class="w-full p-2 border rounded bg-white mt-1">
-            <option value="price">Price</option>
-            <option value="quantity">Quantity</option>
-            <option value="dateAdded">Date Added</option>
-          </select>
-        </div>
-         <!-- Sort Order & Apply Button -->
-        <div class="flex space-x-2">
-          <select formControlName="sort_order" class="w-full p-2 border rounded bg-white">
-            <option [ngValue]="1">Low to High</option>
-            <option [ngValue]="-1">High to Low</option>
-          </select>
-          <button type="submit" class="h-10 px-4 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700">Done</button>
-        </div>
-      </form>
-    </div>
-  }
+  <button (click)="toggleFilter()" class="w-full sm:w-auto flex-shrink-0 flex items-center justify-center h-12 px-5 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm font-bold text-gray-800 transition-colors">
+    <span class="material-icons mr-2 text-gray-600">filter_list</span>
+    Filter & Sort
+  </button>
+  
+  <button (click)="csvInput.click()" class="w-full sm:w-auto flex-shrink-0 flex items-center justify-center h-12 px-5 rounded-lg bg-green-600 hover:bg-green-700 text-sm font-bold text-white transition-colors">
+    <span class="material-icons mr-2">upload_file</span>
+    Import CSV
+  </button>
+  <input type="file" #csvInput (change)="onFileSelected($event)" accept=".csv" class="hidden">
+
+  <button (click)="pdfInput.click()" class="w-full sm:w-auto flex-shrink-0 flex items-center justify-center h-12 px-5 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-bold text-white transition-colors">
+    <span class="material-icons mr-2">picture_as_pdf</span>
+    Import PDF
+  </button>
+  <input type="file" #pdfInput (change)="onPdfFileSelected($event)" accept=".pdf" class="hidden">
+  
+  <button (click)="exportPdf()" class="w-full sm:w-auto flex-shrink-0 flex items-center justify-center h-12 px-5 rounded-lg bg-red-600 hover:bg-red-700 text-sm font-bold text-white transition-colors">
+    <span class="material-icons mr-2">download</span>
+    Export PDF
+  </button>
 </div>
-   
-    <div class="px-4 py-3 @container">
-      <div class="w-full overflow-x-auto rounded-xl border border-[#cedee8] bg-slate-50">
+      @if (isFilterOpen) {
+      <div class="mt-4 border-t pt-4 animate-slide-down">
+        <form [formGroup]="filterForm" (ngSubmit)="applyFilters()"
+          class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div>
+            <label for="min_price" class="text-sm font-medium">Min Price</label>
+            <input id="min_price" type="number" formControlName="min_price"
+              class="w-full p-2 border rounded mt-1 bg-white">
+          </div>
+          <div>
+            <label for="max_price" class="text-sm font-medium">Max Price</label>
+            <input id="max_price" type="number" formControlName="max_price"
+              class="w-full p-2 border rounded mt-1 bg-white">
+          </div>
+          <div>
+            <label for="sort_by" class="text-sm font-medium">Sort By</label>
+            <select id="sort_by" formControlName="sort_by" class="w-full p-2 border rounded bg-white mt-1">
+              <option value="price">Price</option>
+              <option value="quantity">Quantity</option>
+              <option value="dateAdded">Date Added</option>
+            </select>
+          </div>
+          <div class="flex space-x-2">
+            <select formControlName="sort_order" class="w-full p-2 border rounded bg-white">
+              <option [ngValue]="1">Low to High</option>
+              <option [ngValue]="-1">High to Low</option>
+            </select>
+            <button type="submit"
+              class="h-10 px-4 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">Done</button>
+          </div>
+        </form>
+      </div>
+      }
+    </div>
 
-<div class="w-full max-w-7xl mx-auto">
-
-        <table class="w-full table-auto min-w-max">
-
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-max">
           <thead>
-            <tr class="bg-slate-50">
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">S.No</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Item Name</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Category</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Date Added</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Price</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Count</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Edit</th>
-              <th class=" px-4 py-3 text-left text-sm font-medium leading-normal text-[#0d161c]">Delete</th>
+            <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-600">
+              <th class="p-4">Item Name</th>
+              <th class="p-4">Unique ID</th>
+              <th class="p-4">Category</th>
+              <th class="p-4">Quantity</th>
+              <th class="p-4">Price</th>
+              <th class="p-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            @for (it of items; track it; let i = $index) {
-            <tr class="border-t border-t-[#cedee8]">
-              <td class="h-[72px]   px-4 py-2 align-middle text-sm font-normal leading-normal text-[#0d161c]">{{ i+1 }}</td>
-              <td class="h-[72px]   px-4 py-2 align-middle text-sm font-normal leading-normal text-[#0d161c]">
-  <a [routerLink]="['/item', it._id]" class="text-blue-600 hover:underline cursor-pointer">
-    {{ it.productName }}
-  </a>
-</td>
-              <td class="h-[72px]   px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">{{ it.category }}</td>
-              <td class="h-[72px]   px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">{{ it.dateAdded | date:'yyyy-MM-dd' }}</td>
-              <td class="h-[72px]   px-4 py-2 align-middle text-sm font-normal leading-normal text-[#497b9c]">${{ it.price }}</td>
-              <td class="h-[72px] w-60 px-4 py-2 align-middle text-center">
-  <div class="flex items-center justify-center space-x-3">
-    <!-- Decrement Button -->
-    <button (click)="decrementQuantity(it)" [disabled]="it.quantity <= 1"
-      class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200/40 text-gray-600 
-             transition-all duration-300 hover:scale-110 hover:bg-gray-300 hover:shadow-md 
-             disabled:opacity-40 disabled:hover:scale-100">
-      <span class="material-icons text-base">remove</span>
-    </button>
-
-    <!-- Quantity Number -->
-    <span class="text-gray-700 font-semibold text-lg">{{ it.quantity }}</span>
-
-    <!-- Increment Button -->
-    <button (click)="incrementQuantity(it)"
-      class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200/40 text-gray-600 
-             transition-all duration-300 hover:scale-110 hover:bg-gray-300 hover:shadow-md">
-      <span class="material-icons text-base">add</span>
-    </button>
-  </div>
-</td>
-
-              <!-- <td class="h-[72px] w-60 px-4 py-2 align-middle text-sm font-bold leading-normal tracking-[0.015em]"> 
-                  <a [routerLink]="['/edit-item', it._id]" class="text-blue-600 hover:underline cursor-pointer">Edit</a>
+            @for (it of items; track it._id; let i = $index) {
+            <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors animate-fade-in-row"
+              [style.animation-delay.ms]="i * 50">
+              <td class="p-4 font-medium text-gray-800">
+                <a [routerLink]="['/item', it._id]" class="hover:underline">{{ it.productName }}</a>
               </td>
-              <td (click)="openDeleteDialog(it)" class="h-[72px] w-60 px-4 py-2 align-middle text-sm font-bold leading-normal tracking-[0.015em]"> 
-                  <a class="text-blue-600 hover:underline cursor-pointer">Delete</a>
-              </td> -->
-              <td class="h-[72px] px-4 py-2 text-center">
-  <button [routerLink]="['/edit-item', it._id]"
-    class="p-2 rounded-full bg-gray-200/40 text-gray-700 flex items-center justify-center 
-           transition-all duration-300 hover:scale-125 hover:bg-gray-300 hover:shadow-md">
-    <span class="material-icons text-gray-600">edit</span>
-  </button>
-</td>
-
- <td class="h-[72px] px-4 py-2 text-center">
-  <button (click)="openDeleteDialog(it)"
-    class="p-2 rounded-full bg-gray-200/40 text-gray-700 flex items-center justify-center 
-           transition-all duration-300 hover:scale-125 hover:bg-gray-300 hover:shadow-md">
-    <span class="material-icons text-gray-600">delete</span>
-  </button>
-</td>
-
-
-
-              
+              <td class="p-4 text-gray-600">{{ it.UNIQID }}</td>
+              <td class="p-4 text-gray-600">{{ it.category }}</td>
+              <td class="p-4 text-gray-600">{{ it.quantity }}</td>
+              <td class="p-4 text-gray-600">{{ it.price | currency:'USD' }}</td>
+              <td class="p-4">
+                <div class="flex items-center justify-center space-x-2">
+                  <button (click)="decrementQuantity(it)" [disabled]="it.quantity <= 0"
+                    class="p-2 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50">
+                    <span class="material-icons text-gray-600">remove</span>
+                  </button>
+                  <button (click)="incrementQuantity(it)" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                    <span class="material-icons text-gray-600">add</span>
+                  </button>
+                  <button [routerLink]="['/edit-item', it._id]"
+                    class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                    <span class="material-icons text-gray-600">edit</span>
+                  </button>
+                  <button (click)="openDeleteDialog(it)" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                    <span class="material-icons text-red-500">delete</span>
+                  </button>
+                </div>
+              </td>
             </tr>
             } @empty {
-            <tr class="border-t border-t-[#cedee8]">
-              <td colspan="6" class="h-[72px] px-4 py-2 text-center text-sm font-normal leading-normal text-[#497b9c]">
-                No inventory records found.
-              </td>
+            <tr>
+              <td colspan="6" class="p-8 text-center text-gray-500">No inventory records found.</td>
             </tr>
             }
           </tbody>
         </table>
-        </div>
       </div>
     </div>
 
-    <div class="flex items-center justify-center p-4">
-  <button (click)="previousPage()" [disabled]="currentPage === 1" class="flex size-10 items-center justify-center disabled:opacity-50">
-    <div class="text-[#0d161c]" data-icon="CaretLeft" data-size="18px" data-weight="regular">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="currentColor" viewBox="0 0 256 256">
-        <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
-      </svg>
+    <div class="flex items-center justify-center p-4 mt-4">
+      <button (click)="previousPage()" [disabled]="currentPage === 1"
+        class="p-2 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50">
+        <span class="material-icons">chevron_left</span>
+      </button>
+      <span class="p-4 text-sm font-medium text-gray-700">Page {{ currentPage }}</span>
+      <button (click)="nextPage()" [disabled]="items.length < itemsPerPage"
+        class="p-2 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50">
+        <span class="material-icons">chevron_right</span>
+      </button>
     </div>
-  </button>
-  
-  <span class="p-4 text-sm font-medium">Page {{ currentPage }}</span>
-
-  <button (click)="nextPage()" [disabled]="items.length < itemsPerPage" class="flex size-10 items-center justify-center disabled:opacity-50">
-    <div class="text-[#0d161c]" data-icon="CaretRight" data-size="18px" data-weight="regular">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="currentColor" viewBox="0 0 256 256">
-        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-      </svg>
-    </div>
-  </button>
-</div>
 
   </div>
+
   @if (isDialogOpen && itemToDelete) {
-  <app-delete-confirm-dialog 
-    [itemName]="itemToDelete.productName"
-    (confirm)="onConfirmDelete()"
+  <app-delete-confirm-dialog [itemName]="itemToDelete.productName" (confirm)="onConfirmDelete()"
     (close)="closeDeleteDialog()">
   </app-delete-confirm-dialog>
-}
+  }
 </main>

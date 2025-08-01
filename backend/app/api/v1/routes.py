@@ -5,10 +5,20 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import List, Any, Dict, Optional
 from datetime import datetime, timezone
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 from app.models.item import ItemCreate, ItemOut, ItemUpdate, QuantityAdjustment # <-- Import the new model
 
 from app.db.mongodb import get_database
 from app.models.item import ItemCreate, ItemOut
+from pymongo.errors import BulkWriteError
+from app.models.item import BulkCreateResponse
+
+from fastapi import UploadFile, File
+from pydantic import ValidationError
+import pdfplumber
+import io
+
+from app.models.item import ItemCreate, ItemOut, ItemUpdate, QuantityAdjustment, BulkCreateResponse, PDFUploadResponse
 
 # Create a new router instance
 router = APIRouter()
@@ -28,14 +38,21 @@ async def create_item(
 ):
     """
     Creates a new inventory item and stores it in the database.
+    Handles duplicate UNIQID errors.
     """
     item_dict = item.model_dump()
-    # Add the server-generated timestamp
     item_dict["dateAdded"] = datetime.now(timezone.utc)
     
-    insert_result = await db[COLLECTION_NAME].insert_one(item_dict)
+    try:
+        # Attempt to insert the new item
+        insert_result = await db[COLLECTION_NAME].insert_one(item_dict)
+    except DuplicateKeyError:
+        # If it fails because the UNIQID is a duplicate, raise a 409 error
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Item with UNIQID '{item.UNIQID}' already exists."
+        )
     
-    # Retrieve the newly created document to return it in the response
     new_item = await db[COLLECTION_NAME].find_one({"_id": insert_result.inserted_id})
     
     return new_item
@@ -189,3 +206,129 @@ async def adjust_item_quantity(
         raise HTTPException(status_code=404, detail=f"Item with ID {item_id} not found")
 
     return updated_item
+
+
+
+@router.post(
+    "/items/bulk",
+    response_model=BulkCreateResponse,
+    summary="Create multiple inventory items from a list"
+)
+async def bulk_create_items(
+    items: List[ItemCreate] = Body(...),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    Creates multiple inventory items from a list (e.g., from a CSV import).
+    Uses insert_many for efficient bulk insertion.
+    """
+    if not items:
+        raise HTTPException(status_code=400, detail="No items provided")
+
+    # Prepare each item document with a timestamp
+    items_to_insert = []
+    for item in items:
+        item_dict = item.model_dump()
+        item_dict["dateAdded"] = datetime.now(timezone.utc)
+        items_to_insert.append(item_dict)
+
+    try:
+        # Use insert_many with ordered=False to attempt to insert all valid documents
+        result = await db[COLLECTION_NAME].insert_many(items_to_insert, ordered=False)
+        return {
+            "message": "Bulk insert completed.",
+            "inserted_count": len(result.inserted_ids)
+        }
+    except BulkWriteError as e:
+        # This error occurs if there are duplicates
+        # We can still return a partial success message
+        return {
+            "message": f"Bulk insert completed with some duplicate errors.",
+            "inserted_count": e.details.get('nInserted', 0)
+        }
+
+@router.post(
+    "/items/upload-pdf",
+    response_model=PDFUploadResponse,
+    summary="Upload a PDF with items and bulk insert them"
+)
+async def upload_pdf(
+    file: UploadFile = File(...),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    Parses an uploaded PDF file to extract a table of items,
+    validates them, and performs a bulk insert.
+    """
+    contents = await file.read()
+    items_to_insert = []
+    parsing_errors = []
+    total_rows_parsed = 0
+
+    # NEW: Define a mapping from PDF header to our Pydantic model field name
+    header_map = {
+        'Unique ID (SKU)': 'UNIQID',
+        'Product Name': 'productName',
+        'Category': 'category',
+        'Quantity in Stock': 'quantity',
+        'Price (USD)': 'price',
+        'Vendor Contact': 'phoneNumber',
+        'Description': 'description',
+        'Internal Quality Rating (1-5)': 'internalRating', # Example for dynamic fields
+        'Status': 'status',
+        'Is Featured': 'isFeatured',
+        'Purchase Date': 'purchaseDate'
+    }
+
+    try:
+        with pdfplumber.open(io.BytesIO(contents)) as pdf:
+            for page in pdf.pages:
+                table = page.extract_table()
+                if not table or len(table) < 2:
+                    continue
+
+                pdf_headers = table[0]
+                total_rows_parsed += len(table) - 1
+
+                for i, row in enumerate(table[1:]):
+                    raw_row_data = dict(zip(pdf_headers, row))
+                    
+                    # NEW: Create a clean, mapped dictionary for validation
+                    item_data = {}
+                    for pdf_header, model_field in header_map.items():
+                        if pdf_header in raw_row_data and raw_row_data[pdf_header] is not None:
+                            value = raw_row_data[pdf_header]
+                            # Clean up common data issues before validation
+                            if model_field == 'price' and isinstance(value, str):
+                                value = value.replace('$', '').replace(',', '').strip()
+                            item_data[model_field] = value
+
+                    try:
+                        # Validate the clean, mapped data
+                        item = ItemCreate(**item_data)
+                        item_dict = item.model_dump()
+                        item_dict["dateAdded"] = datetime.now(timezone.utc)
+                        items_to_insert.append(item_dict)
+                    except ValidationError as e:
+                        parsing_errors.append(f"Row {i + 2}: Invalid data - {e.errors()}")
+                    except Exception as e:
+                        parsing_errors.append(f"Row {i + 2}: General parsing error - {str(e)}")
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to process PDF file: {str(e)}")
+
+    inserted_count = 0
+    if items_to_insert:
+        try:
+            result = await db[COLLECTION_NAME].insert_many(items_to_insert, ordered=False)
+            inserted_count = len(result.inserted_ids)
+        except BulkWriteError as e:
+            inserted_count = e.details.get('nInserted', 0)
+            parsing_errors.append(f"{len(e.details.get('writeErrors', []))} items had duplicate UNIQIDs.")
+
+    return {
+        "message": "PDF processing complete.",
+        "items_parsed": total_rows_parsed,
+        "items_inserted": inserted_count,
+        "errors": parsing_errors
+    }

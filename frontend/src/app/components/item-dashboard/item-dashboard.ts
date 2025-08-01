@@ -7,6 +7,9 @@ import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-co
 import { Subject } from 'rxjs'; // <-- NEW: Import Subject
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'; // <-- NEW: Import operators
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import * as Papa from 'papaparse';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-item-dashboard',
@@ -27,7 +30,38 @@ export class ItemDashboardComponent implements OnInit {
   itemsPerPage = 10;
   isFilterOpen = false;
   filterForm: FormGroup;
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
 
+      Papa.parse(file, {
+        header: true, // Treats the first row as headers
+        skipEmptyLines: true,
+        complete: (result) => {
+          console.log('Parsed CSV data:', result.data);
+          // The data needs to have quantity and price converted to numbers
+          const itemsToCreate = result.data.map((item: any) => ({
+            ...item,
+            quantity: Number(item.quantity) || 0,
+            price: Number(item.price) || 0,
+          }));
+
+          this.inventoryService.bulkCreateItems(itemsToCreate).subscribe({
+            next: (response) => {
+              alert(`${response.inserted_count} items imported successfully!`);
+              this.loadItems(); // Refresh the table
+              this.loadAllItemsForStats(); // Refresh the stats
+            },
+            error: (err) => {
+              console.error('Error during bulk import:', err);
+              alert('An error occurred during the import.');
+            }
+          });
+        }
+      });
+    }
+  }
    constructor() {
     // NEW: Initialize the filter form
     this.filterForm = this.fb.group({
@@ -68,12 +102,42 @@ export class ItemDashboardComponent implements OnInit {
     const uniqueCategories = new Set(this.allItems.map(item => item.category));
     return uniqueCategories.size;
   }
+    get lowStockItems(): number {
+    // Counts items with quantity less than 10
+    return this.allItems.filter(item => item.quantity < 10).length;
+  }
+
+  get mostValuableItem(): number {
+    if (this.allItems.length === 0) {
+      return 0;
+    }
+    // Finds the item with the highest total value (price * quantity)
+    const mostValuable = this.allItems.reduce((max, item) => 
+      (max.price * max.quantity) > (item.price * item.quantity) ? max : item
+    );
+    return mostValuable.price;
+  }
+  
+  // Add this getter inside the ItemDashboardComponent class
+
+  get averagePrice(): number {
+    if (this.allItems.length === 0) {
+      return 0;
+    }
+    // Calculates the sum of all prices and divides by the number of items
+    const total = this.allItems.reduce((sum, item) => sum + (item.price*item.quantity), 0);
+    return total / this.allItems.length;
+  }
   // NEW: Method to load all items for stat calculations
   loadAllItemsForStats(): void {
     this.inventoryService.getAllItems().subscribe(data => {
       this.allItems = data;
     });
   }
+
+  // Add these two new getters inside the ItemDashboardComponent class
+
+
 
   // After
 loadItems(params: { search?: string } = {}): void {
@@ -174,5 +238,60 @@ previousPage(): void {
       },
       error: (err) => console.error('Error deleting item:', err)
     });
+  }
+
+  exportPdf(): void {
+    if (this.allItems.length === 0) {
+      alert('No items to export.');
+      return;
+    }
+
+    const doc = new jsPDF();
+    const tableHead = [['Unique ID', 'Product Name', 'Category', 'Quantity', 'Price']];
+    const tableBody = this.allItems.map(item => [
+      item.UNIQID,
+      item.productName,
+      item.category,
+      item.quantity,
+      `$${item.price.toFixed(2)}`
+    ]);
+
+    autoTable(doc, {
+      head: tableHead,
+      body: tableBody,
+      didDrawPage: (data) => {
+        // Header
+        doc.setFontSize(20);
+        doc.text('Inventory Report', data.settings.margin.left, 15);
+      }
+    });
+
+    doc.save(`inventory-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
+
+  onPdfFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+
+      this.inventoryService.uploadPdf(file).subscribe({
+        next: (response) => {
+          // Build a detailed success/error message
+          let message = `${response.message}\nParsed: ${response.items_parsed}\nInserted: ${response.items_inserted}`;
+          if (response.errors && response.errors.length > 0) {
+            message += `\nErrors: ${response.errors.join(', ')}`;
+          }
+          alert(message);
+          this.loadItems(); // Refresh the table
+          this.loadAllItemsForStats(); // Refresh the stats
+        },
+        error: (err) => {
+          console.error('Error during PDF import:', err);
+          alert(`An error occurred: ${err.error.detail || 'Please check the file and try again.'}`);
+        },
+        // Reset the file input so you can upload the same file again
+        complete: () => (input.value = '') 
+      });
+    }
   }
 }

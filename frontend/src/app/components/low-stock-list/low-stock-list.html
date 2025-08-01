@@ -1,0 +1,47 @@
+<main class="flex-1 bg-slate-50">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+    
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Low Stock Items</h1>
+      <a routerLink="/dashboard" class="text-sm font-medium text-blue-600 hover:underline">&larr; Back to Dashboard</a>
+    </div>
+
+    @if (!isLoading) {
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-max">
+            <thead>
+              <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-600">
+                <th class="p-4">Item Name</th>
+                <th class="p-4">Unique ID</th>
+                <th class="p-4">Category</th>
+                <th class="p-4">Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of lowStockItems; track item._id) {
+                <tr class="border-t border-gray-200">
+                  <td class="p-4 font-medium text-gray-800">
+                    <a [routerLink]="['/item', item._id]" class="hover:underline">{{ item.productName }}</a>
+                  </td>
+                  <td class="p-4 text-gray-600">{{ item.UNIQID }}</td>
+                  <td class="p-4 text-gray-600">{{ item.category }}</td>
+                  <td class="p-4 font-bold text-orange-500">{{ item.quantity }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="p-8 text-center text-gray-500">
+                    No items are currently low on stock. Great job!
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    } @else {
+      <p class="text-center text-gray-500">Loading low stock items...</p>
+    }
+    
+  </div>
+</main>

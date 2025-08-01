@@ -28,8 +28,11 @@ class PyObjectId(ObjectId):
         return {"type": "string"}
 
 
+# In app/models/item.py
+
 class ItemBase(BaseModel):
     """Base model with common fields."""
+    UNIQID: str  # <-- NEW: Add the required unique ID field
     productName: str
     description: Optional[str] = None
     phoneNumber: Optional[str] = None
@@ -41,6 +44,24 @@ class ItemBase(BaseModel):
         populate_by_name=True,
         arbitrary_types_allowed=True,
         extra = 'allow'
+    )
+
+# ... (PyObjectId, QuantityAdjustment, ItemCreate, ItemOut classes remain the same) ...
+
+class ItemUpdate(BaseModel):
+    """Model for updating an item. All fields are optional."""
+    UNIQID: Optional[str] = None # <-- NEW: Also add as optional for updates
+    productName: Optional[str] = None
+    description: Optional[str] = None
+    phoneNumber: Optional[str] = None
+    category: Optional[str] = None
+    quantity: Optional[int] = Field(default=None, gt=0)
+    price: Optional[float] = Field(default=None, gt=0)
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        # REMOVED json_encoders as it's not needed here and can cause issues
     )
 
 class QuantityAdjustment(BaseModel):
@@ -57,6 +78,7 @@ class ItemOut(ItemBase):
     """Model used for returning an item to the client."""
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     dateAdded: datetime
+    UNIQID: Optional[str] = None # <-- OVERRIDE: Make UNIQID optional for responses
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -64,17 +86,16 @@ class ItemOut(ItemBase):
         json_encoders={ObjectId: str}
     )
 
-class ItemUpdate(BaseModel):
-    """Model for updating an item. All fields are optional."""
-    productName: Optional[str] = None
-    description: Optional[str] = None
-    phoneNumber: Optional[str] = None
-    category: Optional[str] = None
-    quantity: Optional[int] = Field(default=None, gt=0)
-    price: Optional[float] = Field(default=None, gt=0)
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        arbitrary_types_allowed=True,
-        json_encoders={ObjectId: str}
-    )
+class BulkCreateResponse(BaseModel):
+    """Response model for bulk item creation."""
+    message: str
+    inserted_count: int
+
+
+class PDFUploadResponse(BaseModel):
+    """Response model for PDF upload and processing."""
+    message: str
+    items_parsed: int
+    items_inserted: int
+    errors: list[str] = []

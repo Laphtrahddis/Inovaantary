@@ -1,92 +1,56 @@
-<!-- <div class="container mx-auto p-4 max-w-lg">
-  <h1 class="text-2xl font-bold mb-4">
-    {{ isEditMode ? 'Edit Item' : 'Add New Item' }}
-  </h1>
+<main class="flex-1 bg-slate-50 p-4 sm:p-8 flex items-center justify-center">
 
-  <form [formGroup]="itemForm" (ngSubmit)="onSave()" class="space-y-4">
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6 sm:p-8 animate-fade-in">
+
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">
+      {{ isEditMode ? 'Edit Item' : 'Add New Item' }}
+    </h1>
+    <p class="text-gray-500 mb-6">Fill out the details below.</p>
     
-    @for (field of formConfig; track field.name) {
-      <div class="field-container">
-        <label [for]="field.name" class="block font-medium">{{ field.label }}</label>
-        
-        @switch (field.type) {
-          @case ('text') {
-            <input [id]="field.name" type="text" [formControlName]="field.name" class="w-full p-2 border rounded">
-          }
-          @case ('number') {
-            <input [id]="field.name" type="number" [formControlName]="field.name" class="w-full p-2 border rounded">
-          }
-          @case ('date') {
-            <input [id]="field.name" type="date" [formControlName]="field.name" class="w-full p-2 border rounded">
-          }
-          @case ('textarea') {
-            <textarea [id]="field.name" [formControlName]="field.name" class="w-full p-2 border rounded"></textarea>
-          }
-          @case ('checkbox') {
-            <div class="mt-2">
-              <input [id]="field.name" type="checkbox" [formControlName]="field.name" class="h-4 w-4 rounded border-gray-300">
-            </div>
-          }
-          @case ('radio') {
-            <div class="mt-2 space-y-2">
-              @for (option of field.options; track option.value) {
-                <label class="flex items-center">
-                  <input type="radio" [name]="field.name" [value]="option.value" [formControlName]="field.name" class="h-4 w-4">
-                  <span class="ml-2">{{ option.label }}</span>
-                </label>
-              }
-            </div>
-          }
-        }
+    @if (errorMessage) {
+      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
+        <p class="font-bold">Error</p>
+        <p>{{ errorMessage }}</p>
       </div>
     }
-    
-    <button type="submit" [disabled]="itemForm.invalid" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400">
-      Save Item
-    </button>
 
-  </form>
-</div> -->
-
-
-<div class="container mx-auto p-4 max-w-lg">
-  <h1 class="text-2xl font-bold mb-4">
-    {{ isEditMode ? 'Edit Item' : 'Add New Item' }}
-  </h1>
-
-  <form [formGroup]="itemForm" (ngSubmit)="onSave()" class="space-y-6">
-    
-    @for (field of formConfig; track field.name) {
-      <div class="field-container">
-        <label [for]="field.name" class="block font-medium mb-1">{{ field.label }}</label>
-        
-        @switch (field.type) {
-          @case ('text') { <input [id]="field.name" type="text" [formControlName]="field.name" class="w-full p-2 border rounded"> }
-          @case ('number') { <input [id]="field.name" type="number" [formControlName]="field.name" class="w-full p-2 border rounded"> }
-          @case ('tel') { <input [id]="field.name" type="tel" [formControlName]="field.name" class="w-full p-2 border rounded"> }
-          @case ('textarea') { <textarea [id]="field.name" [formControlName]="field.name" class="w-full p-2 border rounded"></textarea> }
+    <form [formGroup]="itemForm" (ngSubmit)="onSave()" class="space-y-6">
+      
+      @for (field of formConfig; track field.name; let i = $index) {
+        <div class="animate-fade-in-row" [style.animation-delay.ms]="i * 50">
+          <label [for]="field.name" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
           
-          @case ('select') {
-            <select [id]="field.name" [formControlName]="field.name" class="w-full p-2 border rounded bg-white">
-              @for (option of field.options; track option.value) {
-                <option [value]="option.value">{{ option.label }}</option>
-              }
-            </select>
-          }
+          @switch (field.type) {
+            @case ('text') { <input [id]="field.name" type="text" [formControlName]="field.name" class="form-field"> }
+            @case ('number') { <input [id]="field.name" type="number" [formControlName]="field.name" class="form-field"> }
+            @case ('tel') { <input [id]="field.name" type="tel" [formControlName]="field.name" class="form-field"> }
+            
+            @case ('textarea') { 
+              <textarea [id]="field.name" [formControlName]="field.name" class="form-field min-h-24"></textarea> 
+            }
+            
+            @case ('select') {
+              <select [id]="field.name" [formControlName]="field.name" class="form-field bg-white">
+                @for (option of field.options; track option.value) {
+                  <option [value]="option.value" [disabled]="option.value === ''">{{ option.label }}</option>
+                }
+              </select>
+            }
 
-          @case ('range') {
-            <div class="flex items-center space-x-4">
-              <input [id]="field.name" type="range" [min]="field.min" [max]="field.max" [formControlName]="field.name" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-              <span class="font-semibold w-8 text-center">{{ itemForm.get(field.name)?.value }}</span>
-            </div>
+            @case ('range') {
+              <div class="flex items-center space-x-4 pt-2">
+                <input [id]="field.name" type="range" [min]="field.min" [max]="field.max" [formControlName]="field.name" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <span class="font-semibold text-gray-700 w-8 text-center">{{ itemForm.get(field.name)?.value }}</span>
+              </div>
+            }
           }
-        }
-      </div>
-    }
-    
-    <button type="submit" [disabled]="itemForm.invalid" class="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 disabled:bg-gray-400 font-bold">
-      Save Item
-    </button>
+        </div>
+      }
+      
+      <button type="submit" [disabled]="itemForm.invalid" class="w-full mt-8 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-bold text-lg shadow-md hover:shadow-lg transition-all duration-300">
+        Save Item
+      </button>
 
-  </form>
-</div>
+    </form>
+  </div>
+</main>

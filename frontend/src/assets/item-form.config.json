@@ -1,5 +1,11 @@
 [
   {
+    "name": "UNIQID",
+    "label": "Unique ID (SKU)",
+    "type": "text",
+    "validators": { "required": true }
+  },
+  {
     "name": "productName",
     "label": "Product Name",
     "type": "text",

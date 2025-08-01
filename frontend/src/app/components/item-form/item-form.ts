@@ -1,14 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; // <-- Import CommonModule
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { InventoryService } from '../../services/inventory';
-import formConfig from '../../../assets/item-form.config.json'; // <-- Import the JSON config
+import formConfig from '../../../assets/item-form.config.json';
+import { HttpErrorResponse } from '@angular/common/http'; // <-- NEW: Import HttpErrorResponse
 
 @Component({
   selector: 'app-item-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule], // <-- Add CommonModule for @for
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './item-form.html',
   styleUrl: './item-form.css'
 })
@@ -18,15 +19,15 @@ export class ItemFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // NEW: Properties for the dynamic form
   formConfig = formConfig;
   itemForm: FormGroup;
-
   isEditMode = false;
   private currentItemId: string | null = null;
+  
+  // NEW: Property to hold our error message
+  errorMessage: string | null = null;
 
   constructor() {
-    // Dynamically build the form from the JSON config
     this.itemForm = this.fb.group({});
     this.formConfig.forEach(field => {
       const validators = this.getValidators(field.validators);
@@ -42,33 +43,31 @@ export class ItemFormComponent implements OnInit {
         this.itemForm.patchValue(item);
       });
     }
+
+    // NEW: Clear the error message whenever the user changes a value in the form
+    this.itemForm.valueChanges.subscribe(() => {
+      this.errorMessage = null;
+    });
   }
 
-  // NEW: Helper function to map JSON validators to Angular Validators
   private getValidators(validatorsConfig: any): ValidatorFn[] {
     const validators: ValidatorFn[] = [];
-    if (validatorsConfig.required) {
-      validators.push(Validators.required);
-    }
-    if (validatorsConfig.min) {
-      validators.push(Validators.min(validatorsConfig.min));
-    }
-    // NEW: Add maxLength validator
-    if (validatorsConfig.maxLength) {
-      validators.push(Validators.maxLength(validatorsConfig.maxLength));
-    }
-    // NEW: Add pattern validator
-    if (validatorsConfig.pattern) {
-      validators.push(Validators.pattern(validatorsConfig.pattern));
-    }
+    if (validatorsConfig.required) { validators.push(Validators.required); }
+    if (validatorsConfig.min) { validators.push(Validators.min(validatorsConfig.min)); }
+    if (validatorsConfig.maxLength) { validators.push(Validators.maxLength(validatorsConfig.maxLength)); }
+    if (validatorsConfig.pattern) { validators.push(Validators.pattern(validatorsConfig.pattern)); }
     return validators;
   }
 
   onSave(): void {
     if (!this.itemForm.valid) {
-      console.error('Form is invalid');
+      this.errorMessage = 'Please fill out all required fields correctly.';
       return;
     }
+    
+    // Reset error message before trying to save
+    this.errorMessage = null;
+
     const action = this.isEditMode
       ? this.inventoryService.updateItem(this.currentItemId!, this.itemForm.value)
       : this.inventoryService.createItem(this.itemForm.value);
@@ -78,7 +77,17 @@ export class ItemFormComponent implements OnInit {
         console.log(`Item ${this.isEditMode ? 'updated' : 'created'} successfully!`);
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => console.error(`Error ${this.isEditMode ? 'updating' : 'creating'} item:`, err)
+      // MODIFIED: Updated error handling
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 409) {
+          // If it's a 409 Conflict error, display the message from the backend
+          this.errorMessage = err.error.detail;
+        } else {
+          // For any other error, show a generic message
+          this.errorMessage = 'An unexpected error occurred. Please try again.';
+          console.error(`Error ${this.isEditMode ? 'updating' : 'creating'} item:`, err);
+        }
+      }
     });
   }
 }
